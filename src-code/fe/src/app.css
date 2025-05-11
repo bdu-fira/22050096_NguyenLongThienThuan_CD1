@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-100 dark:bg-gray-900;
+  font-family: 'Roboto', sans-serif; /* Chọn font chữ phù hợp */
+}
+
+/* Glassmorphism styles */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glassmorphism-card {
+  @apply glassmorphism p-4 rounded-lg shadow-md hover:bg-opacity-30 transition duration-300;
+}
+
+.glassmorphism-input {
+  @apply glassmorphism w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-200;
+}
+
+.glassmorphism-button {
+  @apply glassmorphism px-4 py-2 rounded-md hover:bg-opacity-40 transition duration-300 font-semibold text-gray-700 dark:text-gray-200;
+}
+
+/* Override Ant Design styles for glassmorphism */
+.ant-btn.glassmorphism-button {
+  @apply glassmorphism px-4 py-2 rounded-md hover:bg-opacity-40 transition duration-300 font-semibold text-gray-700 dark:text-gray-200;
+}
+
+.ant-input.glassmorphism-input {
+  @apply glassmorphism w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-200;
+}
