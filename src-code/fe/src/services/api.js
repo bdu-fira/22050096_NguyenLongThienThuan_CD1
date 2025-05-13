@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const axiosInstance = axios.create({
   baseURL: '/api',// baseURL: ,
+  // baseURL: 'http://localhost:4000/',// baseURL: ,
 });
 const getToken=()=>{
   return JSON.parse(sessionStorage.getItem("auth"))?.token??"";

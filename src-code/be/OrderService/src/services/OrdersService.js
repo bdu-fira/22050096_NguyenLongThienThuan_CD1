@@ -1,6 +1,8 @@
 const db = require('../models');
 const ProductsService = require('./ProductsService');
 const { CustomerTypes, Orders, OrderDetails, Customers, Employees, Products, Promotions, OrderPromotions } = db;
+const nodemailer = require('nodemailer');
+const config = require('../config/config.js');
 
 /**
  * Creates a new order.
@@ -339,6 +341,32 @@ async function updateOrder(id, data, requestingUser) {
         }
       ]
     });
+
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: config.development.mail,
+        pass: config.development.appPassword,
+      },
+    });
+
+   
+
+    const mailOptions = {
+      from: 'THT',
+      to: order.customer?.primary_email,
+      subject: 'BÁO GIÁ HOÁ ĐƠN',
+      text: `
+Chào ${order.customer?.customer_name || ''},
+
+SAU ĐÂY LÀ THÔNG TIN HỢP ĐỒNG CỦA BẠN:
+
+Tổng thanh toán: ${order.final_amount}
+        `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Quotation email sent to ${order.customer?.primary_email}`);
     return order;
   } catch (error) {
     console.error('❌ Lỗi khi cập nhật đơn hàng:', error);
@@ -358,7 +386,7 @@ async function getAllOrders(options = {}, requestingUser) {
   try {
 
     // Nếu là Customer: chỉ hiển thị đơn của chính mình
-    if(!requestingUser.roles?.includes('Employee')){
+    if (!requestingUser.roles?.includes('Employee')) {
       if (requestingUser.roles?.includes('Customer')) {
         const customer = await Customers.findOne({
           where: { iduser: requestingUser.iduser },
@@ -366,7 +394,7 @@ async function getAllOrders(options = {}, requestingUser) {
         if (!customer) {
           return []; // hoặc throw new Error('Không tìm thấy hồ sơ khách hàng');
         }
-  
+
         options.where = {
           ...options.where,
           customer_id: customer.customer_id,
@@ -458,13 +486,13 @@ async function getOrderById(id, requestingUser) {
     }
 
     // Nếu là khách hàng, chỉ được xem đơn hàng của chính mình
-    if(!requestingUser.roles?.includes('Employee') && !requestingUser.roles?.includes('Admin')){
-       if (requestingUser.roles?.includes('Customer')) {
-      const customer = await Customers.findOne({ where: { iduser: requestingUser.iduser } });
-      if (!customer || order.customer_id !== customer.customer_id) {
-        return null; // hoặc throw new Error('Không có quyền truy cập đơn hàng này.');
+    if (!requestingUser.roles?.includes('Employee') && !requestingUser.roles?.includes('Admin')) {
+      if (requestingUser.roles?.includes('Customer')) {
+        const customer = await Customers.findOne({ where: { iduser: requestingUser.iduser } });
+        if (!customer || order.customer_id !== customer.customer_id) {
+          return null; // hoặc throw new Error('Không có quyền truy cập đơn hàng này.');
+        }
       }
-    }
     }
 
     return order;
@@ -550,12 +578,17 @@ async function updateOrderStatus(id, status, requestingUser) {
       throw new Error(`Invalid order status: ${status}`);
     }
 
-    const order = await Orders.findByPk(id);
+    const order = await Orders.findByPk(id, {
+      include: [
+        { model: Customers, as: 'customer' },
+        { model: OrderDetails, as: 'orderDetails', include: [{ model: Products, as: 'product' }] }
+      ]
+    });
+
     if (!order) {
       throw new Error('Order not found');
     }
 
-    // Kiểm tra quyền
     const roles = requestingUser.roles || [];
     if (!roles.includes('Employee') && !roles.includes('Admin')) {
       throw new Error('Unauthorized: Only Employee or Admin can update order status.');
@@ -564,24 +597,24 @@ async function updateOrderStatus(id, status, requestingUser) {
     const fromStatus = order.order_status;
     const toStatus = status;
 
-    // Trừ kho khi chuyển sang "chờ đi đơn"
     const shouldDeduct = fromStatus !== 'chờ đi đơn' && toStatus === 'chờ đi đơn';
-
-    // Cộng lại kho nếu quay ngược từ "chờ đi đơn" về trạng thái trước
     const shouldRestock = fromStatus === 'chờ đi đơn' && toStatus !== 'chờ đi đơn';
 
     if (shouldDeduct || shouldRestock) {
-      const orderDetails = await OrderDetails.findAll({ where: { order_id: id } });
-
-      for (const detail of orderDetails) {
+      for (const detail of order.orderDetails) {
         const delta = shouldDeduct ? -detail.quantity : detail.quantity;
-        // await ProductsService.updateStockQuantity(detail.product_id, delta);
+        await ProductsService.updateStockQuantity(detail.product_id, delta);
       }
     }
 
     // Cập nhật trạng thái đơn hàng
     order.order_status = toStatus;
     await order.save();
+
+    // Gửi email khi chuyển từ "chờ báo giá" sang "chờ thanh toán"
+    if (fromStatus === 'chờ báo giá' && toStatus === 'chờ thanh toán') {
+
+    }
 
     return order;
   } catch (error) {

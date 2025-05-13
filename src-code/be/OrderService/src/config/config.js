@@ -10,6 +10,8 @@ module.exports = {
     dialect: 'mysql',
     port: process.env.DB_PORT || 3309,
     jwtSecret: process.env.JWT_SECRET || 'secret-key',
+    mail:process.env.MAIL_APP||"",
+    appPassword:process.env.PASSWORD_APP||"",
     logging: process.env.NODE_ENV !== 'test' ? console.log : false,
   },
   test: {

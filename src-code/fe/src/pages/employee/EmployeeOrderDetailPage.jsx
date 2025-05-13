@@ -164,7 +164,7 @@ const EmployeeOrderDetailPage = () => {
 
     try {
       await dispatch(updateOrder({ id: editableOrder.order_id, data: orderData })).unwrap();
-      message.success('Cập nhật đơn hàng thành công!');
+     navigate(-1);
     } catch (error) {
       message.error('Lỗi cập nhật đơn hàng: ' + error.message);
     }

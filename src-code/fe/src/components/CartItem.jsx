@@ -18,9 +18,9 @@ const CartItem = ({ item }) => {
   return (
     <div className="flex items-center justify-between py-2 border-b border-gray-200">
       <div className="flex items-center">
-        <img src={`https://via.placeholder.com/50`} alt={item.product_name} className="w-12 h-12 object-cover rounded mr-4" />
+        {/* <img src={`https://via.placeholder.com/50`} alt={item.product_name} className="w-12 h-12 object-cover rounded mr-4" /> */}
         <div>
-          <h3 className="font-semibold text-lg">{item.product_name}</h3>
+          <h3 className="font-semibold text-lg">{item.product.product_name}</h3>
           <p className="text-gray-600">Giá: {item.product.price}</p>
         </div>
       </div>

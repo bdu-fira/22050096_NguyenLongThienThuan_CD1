@@ -4,11 +4,11 @@ let getAuth = () => {
   return JSON.parse(sessionStorage.getItem("auth")) ?? null;
 };
 
-const authData = getAuth();
+const authData = getAuth;
 
 const initialState = {
-  user: authData?.user || null,
-  token: authData?.token || null,
+  user: authData()?.user || null,
+  token: authData()?.token || null,
   loading: false,
   error: null,
 };

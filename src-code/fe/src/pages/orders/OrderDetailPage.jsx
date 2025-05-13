@@ -46,7 +46,7 @@ const OrderDetailPage = () => {
   const handleCreateContract = async () => {
     try {
       const response = await contractService.createContract(id)
-  
+      navigate(-1)
       message.success( 'Đã gửi yêu cầu tạo hợp đồng');
     } catch (error) {
       console.error(error);

@@ -24,7 +24,7 @@ export default function LoginPage() {
         login({ email: values.email, password: values.password })
       );
       sessionStorage.setItem('auth', JSON.stringify(response.payload));
-      message.success('Đăng nhập thành công!');
+      
     } catch (err) {
       message.error(err.message || 'Đã xảy ra lỗi khi đăng nhập.');
     } finally {
@@ -98,7 +98,7 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          {error && <div className="text-red-300 text-sm mt-3">{error}</div>}
+          {error && <div className="text-red-400 text-sm mt-3">Đăng nhập thất bại</div>}
         </Form>
       </div>
     </div>
